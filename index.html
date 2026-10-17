@@ -84,18 +84,18 @@ button{border:0;border-radius:8px;padding:11px 14px;min-height:42px;font-weight:
 <div class="settings-card">
 <h2 class="settings-title">1. Identificação do trabalhador</h2>
 <div class="form-grid">
-<div class="field name-field"><label for="workerName">Nome do trabalhador</label><input id="workerName" type="text" maxlength="70" value="Pedro" placeholder="Ex.: Pedro Silva" autocomplete="off"></div>
+<div class="field name-field"><label for="workerName">Nome do trabalhador</label><input id="workerName" type="text" maxlength="70" value="" placeholder="Ex.: Pedro Silva" autocomplete="off"></div>
 <div class="field mode-field"><span class="field-label">2. Como quer configurar a escala?</span><div class="mode-options">
 <label class="mode-option"><input type="radio" name="setupMode" value="cycle" checked> Sei a posição do ciclo numa data</label>
 <label class="mode-option"><input type="radio" name="setupMode" value="first"> Sei a data do 1.º dia de trabalho</label>
 </div></div>
 <div id="cyclePanel" class="mode-panel">
-<div class="field date-field"><label for="referenceDate">Data de referência</label><input id="referenceDate" type="date" value="2026-10-17" required><span class="field-help">A data em que sabes em que ponto do ciclo a pessoa estava.</span></div>
-<div class="field position-field"><label for="cyclePosition">Nessa data, era o…</label><select id="cyclePosition" required><option value="" disabled>Selecione a opção</option><option value="0">1.º dia de trabalho</option><option value="1">2.º dia de trabalho</option><option value="2">3.º dia de trabalho</option><option value="3" selected>4.º dia de trabalho</option><option value="4">1.º dia de folga</option><option value="5">2.º dia de folga</option></select><span class="field-help">Inclui também as duas posições de folga.</span></div>
+<div class="field date-field"><label for="referenceDate">Data de referência</label><input id="referenceDate" type="date" value="" required><span class="field-help">A data em que sabes em que ponto do ciclo a pessoa estava.</span></div>
+<div class="field position-field"><label for="cyclePosition">Nessa data, era o…</label><select id="cyclePosition" required><option value="" selected disabled>Selecione a opção</option><option value="0">1.º dia de trabalho</option><option value="1">2.º dia de trabalho</option><option value="2">3.º dia de trabalho</option><option value="3">4.º dia de trabalho</option><option value="4">1.º dia de folga</option><option value="5">2.º dia de folga</option></select><span class="field-help">Inclui também as duas posições de folga.</span></div>
 <div class="field action-field"><label>Atalho</label><div class="button-row"><button id="useTodayReference" class="secondary" type="button">Usar hoje como referência</button></div></div>
 </div>
 <div id="firstPanel" class="mode-panel hidden">
-<div class="field date-field"><label for="firstWorkDate">Data do 1.º dia de trabalho</label><input id="firstWorkDate" type="date" value="2026-10-14" required><span class="field-help">A partir desta data, o ciclo começa no dia 1 de trabalho.</span></div>
+<div class="field date-field"><label for="firstWorkDate">Data do 1.º dia de trabalho</label><input id="firstWorkDate" type="date" value="" required><span class="field-help">A partir desta data, o ciclo começa no dia 1 de trabalho.</span></div>
 <div class="field position-field"><span class="field-label">Referência da escala</span><span class="field-help">A data indicada conta como o 1.º dia de trabalho.</span></div>
 <div class="field action-field"><label>Atalho</label><div class="button-row"><button id="useTodayFirst" class="secondary" type="button">Usar hoje como 1.º dia</button></div></div>
 </div>
