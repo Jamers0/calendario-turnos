@@ -162,5 +162,13 @@
     updateMode();
   });
   document.getElementById('printCalendar').addEventListener('click', function () { window.print(); });
+
+  // Fresh page visits start in the same clean state as the "Restaurar" button.
+  // The date defaults to today, but no worker or cycle position is preselected.
+  const todayAtStart = isoLocalDate(new Date());
+  workerName.value = '';
+  referenceDate.value = todayAtStart;
+  cyclePosition.value = '';
+  firstWorkDate.value = todayAtStart;
   renderCalendar();
 })();
