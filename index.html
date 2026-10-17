@@ -46,6 +46,9 @@ button{border:0;border-radius:8px;padding:11px 14px;min-height:42px;font-weight:
 .status{margin-top:10px;color:#9a3412;font-size:13px;font-weight:700}.status:empty{display:none}
 .summary{margin-top:12px;display:flex;gap:9px;flex-wrap:wrap}
 .summary span{display:inline-flex;padding:7px 10px;border:1px solid var(--line);border-radius:999px;background:#f8fafc;color:#405168;font-size:12px}
+.signature{color:#718096;font-size:10px;letter-spacing:.1px;font-weight:400}
+.settings-signature{text-align:right;margin-top:11px;padding-top:8px;border-top:1px solid #eff3f7}
+.calendar-signature{text-align:right;margin-top:5px;font-size:8.5px;color:#718096;letter-spacing:.1px}
 .calendar-area{max-width:1320px;margin:0 auto 28px;padding:0 20px}
 .calendar-sheet{background:#fff;padding:19px;margin:0 0 20px;border:1px solid #e3e9f0;border-radius:14px;box-shadow:0 8px 28px #1b35530d}
 .top{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;padding-bottom:10px;margin-bottom:12px;border-bottom:1.5px solid var(--line)}
@@ -88,6 +91,8 @@ button{border:0;border-radius:8px;padding:11px 14px;min-height:42px;font-weight:
  .swatch.holiday{border:2px solid #111;color:#111;background:#fff}
  .day.today{outline:2px solid #111!important;box-shadow:inset 0 0 0 1px #fff!important}.day.today:after{content:'*';color:#111!important;font-size:6pt;top:0;right:1px}
  .footer{margin-top:1.5mm;padding-top:1mm;font-size:6.3pt}
+.calendar-signature{margin-top:1mm;font-size:6.1pt;color:#555;text-align:right}
+ .settings-signature{display:none!important}
 }
 </style>
 </head>
@@ -118,6 +123,7 @@ button{border:0;border-radius:8px;padding:11px 14px;min-height:42px;font-weight:
 </section>
 <div class="button-row" style="margin-top:14px"><button id="restoreExample" class="secondary" type="button">Restaurar</button><button id="printCalendar" class="primary" type="button">Imprimir / Guardar em PDF</button></div>
 <div class="status" id="status" role="status" aria-live="polite"></div><div class="summary" id="summary" aria-live="polite"></div>
+<div class="signature settings-signature">Criado por Jamerson Barros — o gordinho agradece e paga um café 😁</div>
 </div></section>
 <main class="calendar-area" id="calendarArea" aria-label="Calendário de trabalho e folgas"></main>
 <script src="./app.js" defer></script>
