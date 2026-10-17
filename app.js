@@ -188,7 +188,7 @@
       const top = '<header class="top"><div><h2 class="calendar-title">' + escapeHTML(h1) + '</h2><div class="legend"><span class="legend-item"><span class="swatch work"></span> Trabalho</span><span class="legend-item"><span class="swatch off"></span> Folga</span><span class="legend-item"><span class="swatch holiday">F</span> Feriado</span><span class="legend-item">Semana de segunda-feira a domingo</span></div></div><div class="range-mark">OUT 2026<br>— DEZ 2027</div></header>';
       const grid = '<div class="year-grid">' + group.map(month => renderMonth(month, anchor, today)).join('') + '</div>';
       const footer = '<footer class="footer"><span>Período: <strong>01/10/2026 a 31/12/2027</strong> · ' + counts.total + ' dias</span><span>Trabalho: <strong>' + counts.work + '</strong> · Folga: <strong>' + counts.off + '</strong> · Dias com feriado: <strong>' + counts.holidayDays + '</strong>' + (index === 1 ? ' · Página 2 de 2' : ' · Página 1 de 2') + '</span></footer>';
-      const signature = '<div class="signature calendar-signature">Criado por Jamerson Barros — o gordinho agradece e paga um café 😁</div>';
+      const signature = '<div class="signature calendar-signature">Criado por Jamerson Barros agradece o gordinho e paga um café 😁</div>';
       return '<section class="calendar-sheet" aria-label="Calendário, página ' + (index+1) + ' de 2">' + top + grid + footer + signature + '</section>';
     }).join('');
     summary.innerHTML = '<span>Período: 15 meses</span><span>' + counts.total + ' dias no calendário</span><span>' + counts.work + ' dias de trabalho</span><span>' + counts.off + ' dias de folga</span><span>' + counts.holidayDays + ' dias com feriado assinalado</span>';
