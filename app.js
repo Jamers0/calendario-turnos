@@ -14,6 +14,9 @@
   const calendarArea = document.getElementById('calendarArea');
   const status = document.getElementById('status');
   const summary = document.getElementById('summary');
+  const includeNationalHolidays = document.getElementById('includeNationalHolidays');
+  const municipalityHoliday = document.getElementById('municipalityHoliday');
+  const includeCarnival = document.getElementById('includeCarnival');
 
   function pad(n) { return String(n).padStart(2, '0'); }
   function isoLocalDate(date) { return date.getFullYear() + '-' + pad(date.getMonth()+1) + '-' + pad(date.getDate()); }
@@ -42,6 +45,66 @@
     const delta = Math.round((date.getTime() - anchor.date.getTime()) / MS_PER_DAY);
     const position = mod(anchor.position + delta, 6);
     return { position, isWork: position < 4, ordinal: position < 4 ? position + 1 : position - 3 };
+  }
+
+  function dateKey(date) {
+    return date.getUTCFullYear() + '-' + pad(date.getUTCMonth() + 1) + '-' + pad(date.getUTCDate());
+  }
+  function addUtcDays(date, days) {
+    return new Date(date.getTime() + days * MS_PER_DAY);
+  }
+  // Gregorian Easter computus; national movable holidays are derived from Easter Sunday.
+  function easterSunday(year) {
+    const a = year % 19;
+    const b = Math.floor(year / 100);
+    const c = year % 100;
+    const d = Math.floor(b / 4);
+    const e = b % 4;
+    const f = Math.floor((b + 8) / 25);
+    const g = Math.floor((b - f + 1) / 3);
+    const h = (19 * a + b - d - g + 15) % 30;
+    const i = Math.floor(c / 4);
+    const k = c % 4;
+    const l = (32 + 2 * e + 2 * i - h - k) % 7;
+    const m = Math.floor((a + 11 * h + 22 * l) / 451);
+    const month = Math.floor((h + l - 7 * m + 114) / 31);
+    const day = ((h + l - 7 * m + 114) % 31) + 1;
+    return new Date(Date.UTC(year, month - 1, day));
+  }
+  function holidayLabels(date) {
+    const labels = [];
+    const monthDay = pad(date.getUTCMonth() + 1) + '-' + pad(date.getUTCDate());
+    const year = date.getUTCFullYear();
+
+    if (includeNationalHolidays.checked) {
+      const fixedNational = {
+        '01-01': 'Ano Novo',
+        '04-25': 'Dia da Liberdade',
+        '05-01': 'Dia do Trabalhador',
+        '06-10': 'Dia de Portugal, de Camões e das Comunidades Portuguesas',
+        '08-15': 'Assunção de Nossa Senhora',
+        '10-05': 'Implantação da República',
+        '11-01': 'Dia de Todos os Santos',
+        '12-01': 'Restauração da Independência',
+        '12-08': 'Imaculada Conceição',
+        '12-25': 'Natal'
+      };
+      if (fixedNational[monthDay]) labels.push(fixedNational[monthDay]);
+
+      const easter = easterSunday(year);
+      if (dateKey(date) === dateKey(addUtcDays(easter, -2))) labels.push('Sexta-Feira Santa');
+      if (dateKey(date) === dateKey(easter)) labels.push('Domingo de Páscoa');
+      if (dateKey(date) === dateKey(addUtcDays(easter, 60))) labels.push('Corpo de Deus');
+    }
+
+    if (municipalityHoliday.value === 'lisboa' && monthDay === '06-13') {
+      labels.push('Feriado municipal de Lisboa — Santo António');
+    }
+
+    if (includeCarnival.checked && dateKey(date) === dateKey(addUtcDays(easterSunday(year), -47))) {
+      labels.push('Terça-feira de Carnaval (facultativo)');
+    }
+    return labels;
   }
   function getTodayUTC() {
     const now = new Date();
@@ -77,8 +140,10 @@
         const info = cycleInfo(date, anchor);
         const isToday = date.getTime() === today.getTime();
         const dateLabel = formatDate(date);
-        const dayTitle = dateLabel + ' — ' + (info.isWork ? info.ordinal + 'º dia de trabalho' : info.ordinal + 'º dia de folga') + (isToday ? ' — hoje' : '');
-        const classes = 'day ' + (info.isWork ? 'work' : 'off') + (isToday ? ' today' : '');
+        const holidays = holidayLabels(date);
+        const isHoliday = holidays.length > 0;
+        const dayTitle = dateLabel + ' — ' + (info.isWork ? info.ordinal + 'º dia de trabalho' : info.ordinal + 'º dia de folga') + (isHoliday ? ' — Feriado: ' + holidays.join('; ') : '') + (isToday ? ' — hoje' : '');
+        const classes = 'day ' + (info.isWork ? 'work' : 'off') + (isHoliday ? ' holiday' : '') + (isToday ? ' today' : '');
         html += '<div class="' + classes + '" title="' + dayTitle + '" aria-label="' + dayTitle + '"><span>' + day + '</span></div>';
         day++;
       }
@@ -88,15 +153,16 @@
     return html;
   }
   function countPeriod(anchor) {
-    let work = 0, off = 0, total = 0;
+    let work = 0, off = 0, total = 0, holidayDays = 0;
     const start = new Date(Date.UTC(START_YEAR, START_MONTH, 1));
     const end = new Date(Date.UTC(END_YEAR, END_MONTH + 1, 0));
     for (let t = start.getTime(); t <= end.getTime(); t += MS_PER_DAY) {
       const info = cycleInfo(new Date(t), anchor);
       total++;
       if (info.isWork) work++; else off++;
+      if (holidayLabels(new Date(t)).length > 0) holidayDays++;
     }
-    return {work, off, total};
+    return {work, off, total, holidayDays};
   }
   function titleName() {
     const name = workerName.value.trim();
@@ -122,12 +188,12 @@
     const h1 = titleName();
     const counts = countPeriod(anchor);
     calendarArea.innerHTML = groups.map((group, index) => {
-      const top = '<header class="top"><div><h2 class="calendar-title">' + escapeHTML(h1) + '</h2><div class="legend"><span class="legend-item"><span class="swatch work"></span> Trabalho</span><span class="legend-item"><span class="swatch off"></span> Folga</span><span class="legend-item">Semana de segunda-feira a domingo</span></div></div><div class="range-mark">OUT 2026<br>— DEZ 2027</div></header>';
+      const top = '<header class="top"><div><h2 class="calendar-title">' + escapeHTML(h1) + '</h2><div class="legend"><span class="legend-item"><span class="swatch work"></span> Trabalho</span><span class="legend-item"><span class="swatch off"></span> Folga</span><span class="legend-item"><span class="swatch holiday">F</span> Feriado</span><span class="legend-item">Semana de segunda-feira a domingo</span></div></div><div class="range-mark">OUT 2026<br>— DEZ 2027</div></header>';
       const grid = '<div class="year-grid">' + group.map(month => renderMonth(month, anchor, today)).join('') + '</div>';
-      const footer = '<footer class="footer"><span>Período: <strong>01/10/2026 a 31/12/2027</strong> · ' + counts.total + ' dias</span><span>Trabalho: <strong>' + counts.work + '</strong> · Folga: <strong>' + counts.off + '</strong>' + (index === 1 ? ' · Página 2 de 2' : ' · Página 1 de 2') + '</span></footer>';
+      const footer = '<footer class="footer"><span>Período: <strong>01/10/2026 a 31/12/2027</strong> · ' + counts.total + ' dias</span><span>Trabalho: <strong>' + counts.work + '</strong> · Folga: <strong>' + counts.off + '</strong> · Dias com feriado: <strong>' + counts.holidayDays + '</strong>' + (index === 1 ? ' · Página 2 de 2' : ' · Página 1 de 2') + '</span></footer>';
       return '<section class="calendar-sheet" aria-label="Calendário, página ' + (index+1) + ' de 2">' + top + grid + footer + '</section>';
     }).join('');
-    summary.innerHTML = '<span>Período: 15 meses</span><span>' + counts.total + ' dias no calendário</span><span>' + counts.work + ' dias de trabalho</span><span>' + counts.off + ' dias de folga</span>';
+    summary.innerHTML = '<span>Período: 15 meses</span><span>' + counts.total + ' dias no calendário</span><span>' + counts.work + ' dias de trabalho</span><span>' + counts.off + ' dias de folga</span><span>' + counts.holidayDays + ' dias com feriado assinalado</span>';
     document.title = h1;
   }
   function escapeHTML(s) {
@@ -140,7 +206,7 @@
     renderCalendar();
   }
   document.querySelectorAll('input[name="setupMode"]').forEach(el => el.addEventListener('change', updateMode));
-  [workerName, referenceDate, cyclePosition, firstWorkDate].forEach(el => { el.addEventListener('input', renderCalendar); el.addEventListener('change', renderCalendar); });
+  [workerName, referenceDate, cyclePosition, firstWorkDate, includeNationalHolidays, municipalityHoliday, includeCarnival].forEach(el => { el.addEventListener('input', renderCalendar); el.addEventListener('change', renderCalendar); });
   document.getElementById('useTodayReference').addEventListener('click', function () {
     referenceDate.value = isoLocalDate(new Date());
     cyclePosition.value = '';
