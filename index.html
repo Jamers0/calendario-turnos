@@ -113,14 +113,8 @@ button{border:0;border-radius:8px;padding:11px 14px;min-height:42px;font-weight:
 <div class="field action-field"><label>Atalho</label><div class="button-row"><button id="useTodayFirst" class="secondary" type="button">Usar hoje como 1.º dia</button></div></div>
 </div>
 </div>
-<section class="holiday-settings" aria-label="Configuração de feriados">
-<h3 class="holiday-title">3. Feriados</h3>
-<div class="holiday-controls">
-<label class="holiday-option"><input id="includeNationalHolidays" type="checkbox" checked> Feriados nacionais</label>
-<div class="field holiday-municipality"><label for="municipalityHoliday">Feriado municipal</label><select id="municipalityHoliday"><option value="lisboa" selected>Lisboa — Santo António (13 de junho)</option><option value="none">Não assinalar feriado municipal</option></select></div>
-<label class="holiday-option"><input id="includeCarnival" type="checkbox"> Carnaval (facultativo)</label>
-</div>
-<p class="holiday-note">Os feriados são marcadores informativos e não alteram a escala de trabalho/folga. O Carnaval e o feriado municipal são facultativos e dependem do contrato ou da regulamentação aplicável.</p>
+<section class="holiday-settings" aria-label="Feriados">
+<label class="holiday-option"><input id="showHolidays" type="checkbox" checked> Exibir Feriados</label>
 </section>
 <div class="button-row" style="margin-top:14px"><button id="restoreExample" class="secondary" type="button">Restaurar</button><button id="printCalendar" class="primary" type="button">Imprimir / Guardar em PDF</button></div>
 <div class="status" id="status" role="status" aria-live="polite"></div><div class="summary" id="summary" aria-live="polite"></div>
