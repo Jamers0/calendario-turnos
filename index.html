@@ -1,23 +1,108 @@
 <!doctype html>
 <html lang="pt-PT">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Calendário de Turnos</title>
-  <style>
-    body{margin:0;min-height:100vh;display:grid;place-items:center;padding:24px;box-sizing:border-box;background:#eef3f8;color:#14243a;font:16px Arial,sans-serif}
-    main{max-width:640px;padding:32px;background:#fff;border:1px solid #d6dee8;border-radius:16px}
-    h1{margin-top:0;font-size:28px}
-    p{line-height:1.6;color:#46576d}
-    a{color:#174b85}
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Gerador de calendários para escalas rotativas de 4 dias de trabalho e 2 dias de folga.">
+<title>Calendário de Turnos</title>
+<style>
+:root{--ink:#14243a;--muted:#5d6d81;--line:#d6dee8;--work:#e1efff;--work-ink:#174b85;--off:#b5b5b5;--brand:#173b67;--focus:#2563eb}
+*{box-sizing:border-box}
+html{background:#eef3f8}
+body{margin:0;color:var(--ink);font-family:Arial,Helvetica,sans-serif;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+button,input,select{font:inherit}
+.app-header{max-width:1320px;margin:22px auto 0;padding:0 20px}
+.app-header h1{margin:0 0 5px;font-size:27px;letter-spacing:-.5px}
+.settings{max-width:1320px;margin:18px auto;padding:0 20px}
+.settings-card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px;box-shadow:0 6px 20px #1b35530c}
+.settings-title{margin:0 0 14px;font-size:17px}
+.form-grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:13px;align-items:end}
+.field{min-width:0;display:flex;flex-direction:column;gap:6px}
+.field label,.field-label{font-size:12px;font-weight:800;color:#34465c}
+.field input,.field select{width:100%;min-height:42px;border:1px solid #bcc8d7;border-radius:8px;background:#fff;padding:9px 11px;color:var(--ink)}
+.field input:focus,.field select:focus,button:focus-visible{outline:3px solid #93c5fd;outline-offset:2px;border-color:var(--focus)}
+.name-field{grid-column:span 4}.mode-field{grid-column:span 8}.date-field{grid-column:span 3}.position-field{grid-column:span 5}.action-field{grid-column:span 4}
+.mode-options{display:flex;gap:9px;flex-wrap:wrap}
+.mode-option{display:flex;align-items:center;gap:8px;min-height:42px;padding:9px 12px;border:1px solid var(--line);border-radius:8px;background:#f8fafc;font-size:13px;cursor:pointer}
+.mode-option input{width:auto;min-height:0;margin:0;accent-color:var(--brand)}
+.field-help{font-size:11px;font-weight:400;color:var(--muted);line-height:1.4}
+.mode-panel{grid-column:1/-1;display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:13px;align-items:start}
+#firstPanel .date-field{grid-column:span 5}#firstPanel .position-field{grid-column:span 3}#firstPanel .action-field{grid-column:span 4}
+.hidden{display:none!important}
+.button-row{display:flex;flex-wrap:wrap;align-items:center;gap:9px}
+button{border:0;border-radius:8px;padding:11px 14px;min-height:42px;font-weight:800;font-size:13px;cursor:pointer}
+.primary{background:var(--brand);color:#fff}.primary:hover{background:#24558e}
+.secondary{background:#edf2f7;color:#233b59;border:1px solid #cbd5e1}.secondary:hover{background:#e2e8f0}
+.status{margin-top:10px;color:#9a3412;font-size:13px;font-weight:700}.status:empty{display:none}
+.summary{margin-top:12px;display:flex;gap:9px;flex-wrap:wrap}
+.summary span{display:inline-flex;padding:7px 10px;border:1px solid var(--line);border-radius:999px;background:#f8fafc;color:#405168;font-size:12px}
+.calendar-area{max-width:1320px;margin:0 auto 28px;padding:0 20px}
+.calendar-sheet{background:#fff;padding:19px;margin:0 0 20px;border:1px solid #e3e9f0;border-radius:14px;box-shadow:0 8px 28px #1b35530d}
+.top{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;padding-bottom:10px;margin-bottom:12px;border-bottom:1.5px solid var(--line)}
+.calendar-title{margin:0;font-size:25px;line-height:1.08;letter-spacing:-.5px}
+.legend{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:9px;font-size:12px;color:#33465e}
+.legend-item{display:flex;align-items:center;gap:6px}
+.swatch{width:12px;height:12px;border-radius:3px;display:inline-block;border:1px solid #111;flex:none}
+.swatch.work{background:var(--work)}.swatch.off{background:var(--off)}
+.range-mark{flex:none;font-size:16px;font-weight:800;color:#526b87;text-align:right;line-height:1.35}
+.year-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.month-card{min-width:0;border:1px solid var(--line);border-radius:8px;overflow:hidden;padding:8px 8px 7px;background:#fff;break-inside:avoid}
+.month-name{font-weight:800;font-size:12px;letter-spacing:.35px;text-transform:uppercase;padding:0 0 6px;color:#193a61}
+.days-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:3px}
+.weekday-row{margin-bottom:4px}.weekday-row div{text-align:center;color:#69798d;font-size:9px;font-weight:800;padding:2px 0}
+.day{position:relative;text-align:center;display:flex;justify-content:center;align-items:center;min-width:0;height:25px;border-radius:3px;font-size:11px;font-weight:700;color:#304057}
+.day.work{background:var(--work);color:var(--work-ink);border:1px solid #334155}
+.day.off{background:var(--off);color:#111;border:1px solid #334155}
+.day.empty{background:transparent;border:1px solid transparent}
+.day.today{outline:2px solid #0b4f9c;outline-offset:-3px;box-shadow:inset 0 0 0 1px #fff}
+.day.today:after{content:'HOJE';position:absolute;right:1px;top:1px;font-size:5px;line-height:1;color:#0b4f9c;letter-spacing:-.2px}
+.day.today span{transform:translateY(1px)}
+.footer{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;border-top:1px solid var(--line);margin-top:12px;padding-top:8px;color:var(--muted);font-size:10px}
+.footer strong{color:#34465c}
+@media(max-width:900px){.name-field,.mode-field{grid-column:span 12}.date-field{grid-column:span 5}.position-field{grid-column:span 7}.action-field{grid-column:span 12}.year-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.day{height:24px}}
+@media(max-width:590px){.app-header{margin-top:16px;padding:0 12px}.app-header h1{font-size:23px}.settings,.calendar-area{padding:0 10px}.settings-card{padding:13px}.name-field,.mode-field,.date-field,.position-field,.action-field{grid-column:span 12}.mode-options{display:grid;grid-template-columns:1fr}.calendar-sheet{padding:12px;border-radius:10px}.top{display:block}.calendar-title{font-size:22px}.range-mark{text-align:left;margin-top:8px;font-size:13px}.year-grid{grid-template-columns:1fr}.day{height:27px}}
+@page{size:A4 landscape;margin:7mm}
+@media print{
+ html,body{background:#fff!important;width:100%;margin:0}.app-header,.settings{display:none!important}
+ .calendar-area{width:100%;max-width:none;margin:0;padding:0}
+ .calendar-sheet{width:100%;height:195mm;padding:0;margin:0;border:0;border-radius:0;box-shadow:none;break-after:page;page-break-after:always;overflow:hidden}
+ .calendar-sheet:last-child{break-after:auto;page-break-after:auto}
+ .top{padding-bottom:2mm;margin-bottom:2mm;gap:5mm}.calendar-title{font-size:17pt;margin:0}.legend{font-size:7pt;gap:4mm;margin-top:1mm}.swatch{width:3mm;height:3mm}.range-mark{font-size:10pt}
+ .year-grid{grid-template-columns:repeat(4,minmax(0,1fr));grid-template-rows:repeat(2,1fr);gap:2mm;height:166mm}
+ .month-card{padding:1.6mm 1.5mm 1mm;border-radius:1mm}.month-name{font-size:8pt;padding-bottom:1mm}.days-grid{gap:.55mm}.weekday-row{margin-bottom:.6mm}.weekday-row div{font-size:6pt;padding:.3mm 0}
+ .day{height:7mm;border-radius:.5mm;font-size:7.5pt;color:#111!important}
+ .day.work{border:1.1px solid #111!important;background:#fff!important;color:#111!important}
+ .day.off{border:1.1px solid #111!important;background:#b5b5b5!important;color:#111!important}
+ .day.today{outline:2px solid #111!important;box-shadow:inset 0 0 0 1px #fff!important}.day.today:after{content:'*';color:#111!important;font-size:6pt;top:0;right:1px}
+ .footer{margin-top:1.5mm;padding-top:1mm;font-size:6.3pt}
+}
+</style>
 </head>
 <body>
-  <main>
-    <h1>Calendário de Turnos</h1>
-    <p>A publicação da versão interativa ainda não está concluída.</p>
-    <p>O projeto e o ficheiro de publicação precisam de ser enviados para a branch <strong>main</strong> antes de o calendário estar disponível neste endereço.</p>
-    <p><a href="https://github.com/Jamers0/calendario-turnos">Abrir o repositório no GitHub</a></p>
-  </main>
-</body>
-</html>
+<header class="app-header"><h1>Calendário de Turnos</h1></header>
+<section class="settings" aria-label="Configurar calendário">
+<div class="settings-card">
+<h2 class="settings-title">1. Identificação do trabalhador</h2>
+<div class="form-grid">
+<div class="field name-field"><label for="workerName">Nome do trabalhador</label><input id="workerName" type="text" maxlength="70" value="Pedro" placeholder="Ex.: Pedro Silva" autocomplete="off"></div>
+<div class="field mode-field"><span class="field-label">2. Como quer configurar a escala?</span><div class="mode-options">
+<label class="mode-option"><input type="radio" name="setupMode" value="cycle" checked> Sei a posição do ciclo numa data</label>
+<label class="mode-option"><input type="radio" name="setupMode" value="first"> Sei a data do 1.º dia de trabalho</label>
+</div></div>
+<div id="cyclePanel" class="mode-panel">
+<div class="field date-field"><label for="referenceDate">Data de referência</label><input id="referenceDate" type="date" value="2026-10-17" required><span class="field-help">A data em que sabes em que ponto do ciclo a pessoa estava.</span></div>
+<div class="field position-field"><label for="cyclePosition">Nessa data, era o…</label><select id="cyclePosition" required><option value="" disabled>Selecione a opção</option><option value="0">1.º dia de trabalho</option><option value="1">2.º dia de trabalho</option><option value="2">3.º dia de trabalho</option><option value="3" selected>4.º dia de trabalho</option><option value="4">1.º dia de folga</option><option value="5">2.º dia de folga</option></select><span class="field-help">Inclui também as duas posições de folga.</span></div>
+<div class="field action-field"><label>Atalho</label><div class="button-row"><button id="useTodayReference" class="secondary" type="button">Usar hoje como referência</button></div></div>
+</div>
+<div id="firstPanel" class="mode-panel hidden">
+<div class="field date-field"><label for="firstWorkDate">Data do 1.º dia de trabalho</label><input id="firstWorkDate" type="date" value="2026-10-14" required><span class="field-help">A partir desta data, o ciclo começa no dia 1 de trabalho.</span></div>
+<div class="field position-field"><span class="field-label">Referência da escala</span><span class="field-help">A data indicada conta como o 1.º dia de trabalho.</span></div>
+<div class="field action-field"><label>Atalho</label><div class="button-row"><button id="useTodayFirst" class="secondary" type="button">Usar hoje como 1.º dia</button></div></div>
+</div>
+</div>
+<div class="button-row" style="margin-top:14px"><button id="restoreExample" class="secondary" type="button">Restaurar</button><button id="printCalendar" class="primary" type="button">Imprimir / Guardar em PDF</button></div>
+<div class="status" id="status" role="status" aria-live="polite"></div><div class="summary" id="summary" aria-live="polite"></div>
+</div></section>
+<main class="calendar-area" id="calendarArea" aria-label="Calendário de trabalho e folgas"></main>
+<script src="./app.js" defer></script>
+</body></html>
