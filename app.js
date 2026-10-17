@@ -14,9 +14,7 @@
   const calendarArea = document.getElementById('calendarArea');
   const status = document.getElementById('status');
   const summary = document.getElementById('summary');
-  const includeNationalHolidays = document.getElementById('includeNationalHolidays');
-  const municipalityHoliday = document.getElementById('municipalityHoliday');
-  const includeCarnival = document.getElementById('includeCarnival');
+  const showHolidays = document.getElementById('showHolidays');
 
   function pad(n) { return String(n).padStart(2, '0'); }
   function isoLocalDate(date) { return date.getFullYear() + '-' + pad(date.getMonth()+1) + '-' + pad(date.getDate()); }
@@ -72,36 +70,35 @@
     return new Date(Date.UTC(year, month - 1, day));
   }
   function holidayLabels(date) {
+    if (!showHolidays.checked) return [];
+
     const labels = [];
     const monthDay = pad(date.getUTCMonth() + 1) + '-' + pad(date.getUTCDate());
     const year = date.getUTCFullYear();
+    const fixedNational = {
+      '01-01': 'Ano Novo',
+      '04-25': 'Dia da Liberdade',
+      '05-01': 'Dia do Trabalhador',
+      '06-10': 'Dia de Portugal, de Camões e das Comunidades Portuguesas',
+      '08-15': 'Assunção de Nossa Senhora',
+      '10-05': 'Implantação da República',
+      '11-01': 'Dia de Todos os Santos',
+      '12-01': 'Restauração da Independência',
+      '12-08': 'Imaculada Conceição',
+      '12-25': 'Natal'
+    };
+    if (fixedNational[monthDay]) labels.push(fixedNational[monthDay]);
 
-    if (includeNationalHolidays.checked) {
-      const fixedNational = {
-        '01-01': 'Ano Novo',
-        '04-25': 'Dia da Liberdade',
-        '05-01': 'Dia do Trabalhador',
-        '06-10': 'Dia de Portugal, de Camões e das Comunidades Portuguesas',
-        '08-15': 'Assunção de Nossa Senhora',
-        '10-05': 'Implantação da República',
-        '11-01': 'Dia de Todos os Santos',
-        '12-01': 'Restauração da Independência',
-        '12-08': 'Imaculada Conceição',
-        '12-25': 'Natal'
-      };
-      if (fixedNational[monthDay]) labels.push(fixedNational[monthDay]);
+    const easter = easterSunday(year);
+    if (dateKey(date) === dateKey(addUtcDays(easter, -2))) labels.push('Sexta-Feira Santa');
+    if (dateKey(date) === dateKey(easter)) labels.push('Domingo de Páscoa');
+    if (dateKey(date) === dateKey(addUtcDays(easter, 60))) labels.push('Corpo de Deus');
 
-      const easter = easterSunday(year);
-      if (dateKey(date) === dateKey(addUtcDays(easter, -2))) labels.push('Sexta-Feira Santa');
-      if (dateKey(date) === dateKey(easter)) labels.push('Domingo de Páscoa');
-      if (dateKey(date) === dateKey(addUtcDays(easter, 60))) labels.push('Corpo de Deus');
-    }
+    if (monthDay === '06-13') labels.push('Feriado municipal de Lisboa — Santo António');
 
-    if (municipalityHoliday.value === 'lisboa' && monthDay === '06-13') {
-      labels.push('Feriado municipal de Lisboa — Santo António');
-    }
-
-    if (includeCarnival.checked && dateKey(date) === dateKey(addUtcDays(easterSunday(year), -47))) {
+    // The single display option shows all known dates; the title clarifies
+    // that Carnival is facultative under Article 235 of the Labour Code.
+    if (dateKey(date) === dateKey(addUtcDays(easter, -47))) {
       labels.push('Terça-feira de Carnaval (facultativo)');
     }
     return labels;
@@ -206,7 +203,7 @@
     renderCalendar();
   }
   document.querySelectorAll('input[name="setupMode"]').forEach(el => el.addEventListener('change', updateMode));
-  [workerName, referenceDate, cyclePosition, firstWorkDate, includeNationalHolidays, municipalityHoliday, includeCarnival].forEach(el => { el.addEventListener('input', renderCalendar); el.addEventListener('change', renderCalendar); });
+  [workerName, referenceDate, cyclePosition, firstWorkDate, showHolidays].forEach(el => { el.addEventListener('input', renderCalendar); el.addEventListener('change', renderCalendar); });
   document.getElementById('useTodayReference').addEventListener('click', function () {
     referenceDate.value = isoLocalDate(new Date());
     cyclePosition.value = '';
